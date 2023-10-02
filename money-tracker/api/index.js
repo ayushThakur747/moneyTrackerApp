@@ -1,5 +1,9 @@
 const express = require("express");
 const cors = require("cors");
+require("dotenv").config();
+
+const Transaction = require("./models/transaction.js");
+const mongoose = require("mongoose");
 
 const app = express();
 
@@ -10,9 +14,23 @@ app.get("/api/test", (req, res) => {
   res.json({ body: "test okk" });
 });
 
-app.post("/api/transaction", (req, res) => {
-  console.log({ body: req.body });
-  res.json({ body: req.body });
+app.post("/api/transaction", async (req, res) => {
+  try {
+    console.log({ body: req.body, mongo: process.env.MONGO_URL });
+    await mongoose.connect(process.env.MONGO_URL);
+    const { name, description, datetime, price } = req.body;
+
+    const transaction = await Transaction.create({
+      price,
+      name,
+      description,
+      datetime,
+    });
+    console.log(transaction);
+    res.json({ body: transaction });
+  } catch (error) {
+    console.log(error);
+  }
 });
 
 app.listen(4400);
